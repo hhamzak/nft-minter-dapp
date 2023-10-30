@@ -4,6 +4,7 @@ import { Web3Storage, getFilesFromPath } from 'web3.storage'
 class Nftinter extends Component {
     state = {
         web3token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDgxMmE4MmMxQjQ1RDljODhFNThCMzQ5RTI3YmE3NWUxRTQ0OGM5MzYiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2OTg2NzY4ODcxNjMsIm5hbWUiOiJuZnQtbWludGUtZGFwcCJ9.7sky9ZQq_QIv1zQ74nyR4_ponXhxzddhwCUfAYegisM",
+        fileName: "",
         filePath: "",
         cid: "",
         name: "",
@@ -52,6 +53,18 @@ class Nftinter extends Component {
 
     }
 
+    onChange = async (event) => {
+        console.log(event.target.files);
+        if (event.target.files.length > 0){
+
+            await this.setState({ fileName: event.target.files[0].name, filePath: URL.createObjectURL(event.target.files[0]) })
+        }
+        else {
+            await this.setState({ fileName: "", filePath: "" })
+        }
+        
+    }
+    
     render() {
         return (
             <div>
@@ -70,7 +83,7 @@ class Nftinter extends Component {
                                         <label id="name">Name:</label>
                                         <input type="text" id="fname" name="name" style={{ margin: "5px" }} onChange={(event) => this.setState({ name: event.target.value })} />
                                         <br />
-                                        <input type="file" id="Upload" onChange={(event) => this.setState({ filePath: URL.createObjectURL(event.target.files[0]) })} />
+                                        <input type="file" id="Upload" text={this.state.fileName} onChange={this.onChange.bind(this)} />
                                     </td>
                                     <td>
                                         <img src={this.state.filePath} width="200" height="200" style={{ margin: "5px" }} />
