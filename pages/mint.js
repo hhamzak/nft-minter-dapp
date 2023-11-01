@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Web3Storage, getFilesFromPath } from 'web3.storage'
+import factory from "../ethereum/factory";
+import web3 from "../ethereum/web3";
 
 class Nftinter extends Component {
     state = {
@@ -10,8 +12,11 @@ class Nftinter extends Component {
         name: "",
         items: [],
         newItem: { key: "", value: "" },
-        itemsLenght: 0,
-        amount: 0
+        amount: 0,
+        cidJSON: "",
+        errorMessage: "",
+        disabled: false,
+        transactionHash: "",
     };
 
     async handleNewItemChange(event) {
@@ -33,24 +38,49 @@ class Nftinter extends Component {
     }
 
     async uploadWeb3() {
-        const storage = new Web3Storage({ token: this.state.web3token });
-        const file = await fetch(this.state.filePath).then((r) => r.blob());
-        const cid = await storage.put([file]);
-        await this.setState({ cid: cid });
+        try {
+            this.setState({ disabled: true });
+            const storage = new Web3Storage({ token: this.state.web3token });
+            const file = await fetch(this.state.filePath).then((r) => r.blob());
+            const cid = await storage.put([file]);
+            await this.setState({ cid: cid });
+    
+            const metaData = {
+                Name: this.state.name,
+                DocumentCid: this.state.cid,
+                MetaData: this.state.items.map(item => ({ Key: item.key, Value: item.value })),
+                Amount: this.state.amount
+            };
+    
+            console.log(JSON.stringify(metaData));
+    
+            const fileJSON = new File([JSON.stringify(metaData)], cid + '.json', { type: 'application/json' });
+            const cidJSON = await storage.put([fileJSON]);
+            console.log(`JSON uploaded with CID: ${cidJSON}`);
+            await this.setState({ cidJSON: cidJSON});
+            await this.mint();
+        }
+        catch (err) {
+            this.setState({ errorMessage: err.message });
+            this.setState({ disabled: false });
+          }
+    }
 
-        const metaData = {
-            Name: this.state.name,
-            DocumentCid: this.state.cid,
-            MetaData: this.state.items.map(item => ({ Key: item.key, Value: item.value })),
-            Amount: this.state.amount
-        };
-
-        console.log(JSON.stringify(metaData));
-
-        const fileJSON = new File([JSON.stringify(metaData)], cid + '.json', { type: 'application/json' });
-        const cidJSON = await storage.put([fileJSON]);
-        console.log(`JSON uploaded with CID: ${cidJSON}`);
-
+    async mint(){
+        try {
+            const accounts = await web3.eth.getAccounts();
+            const tx = await factory.methods
+              .mint(accounts[0], this.state.cidJSON)
+              .send({
+                from: accounts[0],
+                value: "1200000000000"
+              });
+            await this.setState({transactionHash: tx});
+          } catch (err) {
+            
+            this.setState({ errorMessage: err.message });
+          }
+          this.setState({ disabled: false });
     }
 
     onChange = async (event) => {
@@ -72,7 +102,9 @@ class Nftinter extends Component {
                 <hr />
                 <h1>filepath: {this.state.filePath}</h1>
                 <h1>cid: {this.state.cid}</h1>
-                <h1>l: {this.state.itemsLenght}</h1>
+                <h3>tx: {this.state.transactionHash}</h3>
+                <h3>amount: {this.state.amount}</h3>
+                <h3>amount: {this.state.amount *10 /100}</h3>
                 <div align="center">
                     <form >
                         <table border="1">
@@ -109,8 +141,8 @@ class Nftinter extends Component {
                                     <td colspan="2" style={{ padding: "10px" }}>
 
                                         <h4> Price</h4>
-                                        <label for="amount">Amount:</label>
-                                        <input type="text" id="fname" name="amaunt" /><br />
+                                        <label for="amount">Amount (gwei):</label>
+                                        <input type="text" id="fname" name="amaunt" onChange={(event) => this.setState({ amount: event.target.value })} /><br />
                                     </td>
                                 </tr>
                             </tbody>
@@ -119,8 +151,9 @@ class Nftinter extends Component {
 
                     </form>
 
-                    <button onClick={this.uploadWeb3.bind(this)}>Mint</button>
+                    <button onClick={this.uploadWeb3.bind(this)} disabled={this.state.disabled}>Mint</button>
                 </div>
+                <h1>Error:  {this.state.errorMessage}</h1>
             </div>
         );
     }

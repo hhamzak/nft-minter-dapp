@@ -1,19 +1,24 @@
-const path = require("path");
-const solc = require("solc");
-const fs = require("fs-extra");
+const path = require('path');
+const fs = require('fs');
+const solc = require('solc');
 
-const buildPath = path.resolve(__dirname, "build");
-fs.removeSync(buildPath);
+const contractPath = path.resolve(__dirname, './contracts/MyNFT.sol');
+const contractSource = fs.readFileSync(contractPath, 'utf8');
 
-const contractPath = path.resolve(__dirname, "contracts", "nftMinter.sol");
-const source = fs.readFileSync(contractPath, "utf8");
-const output = solc.compile(source, 1).contracts;
+const input = {
+  language: 'Solidity',
+  sources: {
+    'MyNFT.sol': {
+      content: contractSource,
+    },
+  },
+  settings: {
+    outputSelection: {
+      '*': {
+        '*': ['*'],
+      },
+    },
+  },
+};
 
-fs.ensureDirSync(buildPath);
-
-for (let contract in output) {
-  fs.outputJsonSync(
-    path.resolve(buildPath, contract + ".json"),
-    output[contract]
-  );
-}
+console.log(solc.compile(JSON.stringify(input)));

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity ^0.8.0;
+pragma solidity ^0.4.17;
 
 //import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import './ERC721A.sol';
+import "./ERC721.sol";
+
 
 contract NFTMinter is ERC721A {
 
@@ -20,11 +21,9 @@ contract NFTMinter is ERC721A {
     }
 
     constructor(string memory name, string memory symbol)
-        ERC721A(name, symbol)
+        ERC721(name, symbol)
     {}
-    
 
-// %10 
-// %90
 
 }
+
