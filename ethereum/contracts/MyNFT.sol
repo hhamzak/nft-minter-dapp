@@ -21,7 +21,7 @@ contract MyNFT is ERC721 {
     function mint(address _to, string memory _imageCid) public payable {
         require(msg.value > 0, "You must pay to mint an NFT");
         require(!mintElementExists[_imageCid],
-                'Error - kryptoBird already exists');
+                'Error - token already exists');
 
         mintElements.push(_imageCid);
         uint tokenId = mintElements.length - 1;
