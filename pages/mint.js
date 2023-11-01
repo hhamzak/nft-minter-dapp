@@ -44,57 +44,73 @@ class Nftinter extends Component {
             const file = await fetch(this.state.filePath).then((r) => r.blob());
             const cid = await storage.put([file]);
             await this.setState({ cid: cid });
-    
+
             const metaData = {
                 Name: this.state.name,
                 DocumentCid: this.state.cid,
                 MetaData: this.state.items.map(item => ({ Key: item.key, Value: item.value })),
                 Amount: this.state.amount
             };
-    
+
             console.log(JSON.stringify(metaData));
-    
+
             const fileJSON = new File([JSON.stringify(metaData)], cid + '.json', { type: 'application/json' });
             const cidJSON = await storage.put([fileJSON]);
             console.log(`JSON uploaded with CID: ${cidJSON}`);
-            await this.setState({ cidJSON: cidJSON});
+            await this.setState({ cidJSON: cidJSON });
             await this.mint();
         }
         catch (err) {
             this.setState({ errorMessage: err.message });
             this.setState({ disabled: false });
-          }
+        }
     }
 
-    async mint(){
+
+
+    async mint() {
         try {
             const accounts = await web3.eth.getAccounts();
+
+            console.log("account : " + accounts[0]);
+            const valueInEther = parseFloat(this.state.amount);
+            const valueInWei = web3.utils.toWei(valueInEther.toString(), 'ether');
+            const gasEstimate = await factory.methods
+                .mint(accounts[0], this.state.cidJSON)
+                .estimateGas({
+                    from: accounts[0],
+                    value: valueInWei
+                });
+            console.log(factory.to);
             const tx = await factory.methods
-              .mint(accounts[0], this.state.cidJSON)
-              .send({
-                from: accounts[0],
-                value: "1200000000000"
-              });
-            await this.setState({transactionHash: tx});
-          } catch (err) {
-            
+                .mint(accounts[0], this.state.cidJSON)
+                .send({
+                    from: accounts[0],
+                    to: "0xB17A4A994A52c914DDEc426222758dac0C66267f",
+                    value: valueInWei,
+                    gas: gasEstimate,
+                })
+
+            await this.setState({ transactionHash: tx });
+        } catch (err) {
+
             this.setState({ errorMessage: err.message });
-          }
-          this.setState({ disabled: false });
+        }
+        this.setState({ disabled: false });
     }
 
     onChange = async (event) => {
         console.log(event.target.files);
-        if (event.target.files.length > 0){
+        if (event.target.files.length > 0) {
 
             await this.setState({ fileName: event.target.files[0].name, filePath: URL.createObjectURL(event.target.files[0]) })
         }
         else {
             await this.setState({ fileName: "", filePath: "" })
         }
-        
+
     }
-    
+
     render() {
         return (
             <div>
@@ -104,7 +120,7 @@ class Nftinter extends Component {
                 <h1>cid: {this.state.cid}</h1>
                 <h3>tx: {this.state.transactionHash}</h3>
                 <h3>amount: {this.state.amount}</h3>
-                <h3>amount: {this.state.amount *10 /100}</h3>
+                <h3>amount: {this.state.amount * 10 / 100}</h3>
                 <div align="center">
                     <form >
                         <table border="1">
