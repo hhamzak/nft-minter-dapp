@@ -116,11 +116,9 @@ class Nftinter extends Component {
             <div>
                 <h2>NFT Minter Dapp</h2>
                 <hr />
-                <h1>filepath: {this.state.filePath}</h1>
-                <h1>cid: {this.state.cid}</h1>
+                <h5>filepath: {this.state.filePath}</h5>
+                <h5>cid: {this.state.cidJSON}</h5>
                 <h3>tx: {this.state.transactionHash}</h3>
-                <h3>amount: {this.state.amount}</h3>
-                <h3>amount: {this.state.amount * 10 / 100}</h3>
                 <div align="center">
                     <form >
                         <table border="1">
@@ -169,7 +167,7 @@ class Nftinter extends Component {
 
                     <button onClick={this.uploadWeb3.bind(this)} disabled={this.state.disabled}>Mint</button>
                 </div>
-                <h1>Error:  {this.state.errorMessage}</h1>
+                <h6>Error:  {this.state.errorMessage}</h6>
             </div>
         );
     }
