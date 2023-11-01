@@ -36,9 +36,9 @@ This contract was published on the Sepolia network via Remix. Contract address: 
 
 You can start the React side with the npm start dev command. Or you can use the start.bat in the project. The start.bat contains the necessary npm install function. On the React side, web3.storage is used as an off chain solution to send the selected image to the block chain. After the image is sent, meta data and other features are sent to web3.storage as JSON with the returned cid.
 
-Problems encountered;
-*Openzeppelin functions could not be compiled with custom javascript compiler, so it was published to the network via Remix ide.
-*Revert of the mint function sent to the network. No problem with remix ide in react code.
+Problems encountered
+* Openzeppelin functions could not be compiled with custom javascript compiler, so it was published to the network via Remix ide.
+* Revert of the mint function sent to the network. No problem with remix ide in react code.
 
 
 
